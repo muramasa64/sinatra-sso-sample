@@ -1,0 +1,37 @@
+---
+- hosts: all
+  sudo: yes
+  remote_user: vagrant
+  tasks:
+    - name: set timezone to Asia/Tokyo
+      command:
+        timedatectl set-timezone Asia/Tokyo
+
+    - name: disable selinux
+      selinux:
+        state=disabled
+
+    - name: disable ipv6
+      sysctl:
+        name=net.ipv6.conf.all.disable_ipv6
+        value=1
+        state=present
+
+    - name: disable default vpv6
+      sysctl:
+        name=net.ipv6.conf.default.disable_ipv6
+        value=1
+        state=present
+
+    - name: remove ipv6 localhost
+      replace:
+        dest=/etc/hosts
+        regexp="^::1"
+        replace="#::1"
+
+    - name: stop firewalld
+      tags: settings
+      service:
+          name=firewalld
+          state=stopped
+          enabled=no
